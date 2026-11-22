@@ -1,0 +1,160 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="Fit enzyme kinetics in your browser and explore inhibitor behavior with webR."
+    />
+    <title>Enzyme Inhibitor Lab</title>
+  </head>
+  <body>
+    <div class="app-shell">
+      <header class="topbar">
+        <a class="brand" href="#" aria-label="Enzyme Inhibitor Lab home">
+          <span class="brand-mark" aria-hidden="true">
+            <svg viewBox="0 0 32 32" fill="none">
+              <path d="M5 22.5 12 16l5 4 10-11" />
+              <path d="M20 9h7v7" />
+              <circle cx="7" cy="24" r="2" />
+              <circle cx="14" cy="17" r="2" />
+              <circle cx="21" cy="18" r="2" />
+            </svg>
+          </span>
+          <span>enzyme<span class="brand-light">lab</span></span>
+        </a>
+        <div class="topbar-note"><span class="live-dot"></span> Runs entirely in your browser</div>
+      </header>
+
+      <main>
+        <section class="intro">
+          <div class="eyebrow"><span class="eyebrow-line"></span> KINETICS WORKBENCH</div>
+          <h1>Enzyme Inhibitor <span>Lab</span></h1>
+          <p>Fit your kinetics data. See what your inhibitor is doing.</p>
+        </section>
+
+        <section class="workspace" aria-label="Kinetics analysis workspace">
+          <aside class="input-panel">
+            <div class="panel-heading">
+              <span class="step-number">01</span>
+              <div>
+                <h2>Your data</h2>
+                <p>One row per measurement</p>
+              </div>
+            </div>
+
+            <label class="upload-zone" for="csv-file">
+              <span class="upload-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none">
+                  <path d="M12 16V4m0 0L7.5 8.5M12 4l4.5 4.5M5 14.5v3A2.5 2.5 0 0 0 7.5 20h9a2.5 2.5 0 0 0 2.5-2.5v-3" />
+                </svg>
+              </span>
+              <span class="upload-title">Drop a CSV here or <strong>browse</strong></span>
+              <span class="upload-hint">CSV format · max 5 MB</span>
+              <input id="csv-file" type="file" accept=".csv,text/csv" />
+            </label>
+
+            <div class="file-status" id="file-status" aria-live="polite">
+              <span class="file-indicator" aria-hidden="true"></span>
+              <span id="file-name">Loading example data…</span>
+            </div>
+
+            <div class="required-columns">
+              <div class="small-label">REQUIRED COLUMNS</div>
+              <div class="column-tags">
+                <span>condition</span>
+                <span>substrate_mM</span>
+                <span>velocity</span>
+              </div>
+              <p>Substrate: mM <span>·</span> Velocity: µmol/min</p>
+            </div>
+
+            <button id="analyze-button" class="analyze-button" type="button" disabled>
+              <span>Run analysis</span>
+              <svg viewBox="0 0 20 20" fill="none" aria-hidden="true">
+                <path d="M4 10h12m-5-5 5 5-5 5" />
+              </svg>
+            </button>
+            <p class="runtime-note"><span class="runtime-mark">R</span> Powered by webR · no data leaves your device</p>
+          </aside>
+
+          <section class="results-panel" aria-live="polite">
+            <div id="empty-state" class="empty-state">
+              <div class="empty-graphic" aria-hidden="true">
+                <span class="empty-axis empty-axis-y"></span>
+                <span class="empty-axis empty-axis-x"></span>
+                <span class="empty-curve"></span>
+                <span class="empty-point point-one"></span>
+                <span class="empty-point point-two"></span>
+                <span class="empty-point point-three"></span>
+                <span class="empty-point point-four"></span>
+              </div>
+              <h2>Your results will appear here</h2>
+              <p>Upload a CSV or use the example dataset to get started.</p>
+            </div>
+
+            <div id="results" class="results-content" hidden>
+              <div class="results-title-row">
+                <div>
+                  <div class="eyebrow"><span class="eyebrow-line"></span> ANALYSIS</div>
+                  <h2>Fit results</h2>
+                </div>
+                <span id="fit-badge" class="fit-badge"></span>
+              </div>
+
+              <div id="warning-banner" class="warning-banner" hidden role="status"></div>
+              <div id="error-banner" class="error-banner" hidden role="alert"></div>
+
+              <div class="result-section">
+                <div class="section-title">
+                  <h3>Parameter estimates</h3>
+                  <span>Estimate ± SE</span>
+                </div>
+                <div class="table-wrap">
+                  <table>
+                    <thead>
+                      <tr>
+                        <th>Condition</th>
+                        <th>Vmax <small>µmol/min</small></th>
+                        <th>Km <small>mM</small></th>
+                        <th>Rows</th>
+                      </tr>
+                    </thead>
+                    <tbody id="results-table"></tbody>
+                  </table>
+                </div>
+              </div>
+
+              <div class="result-section plot-section" id="plot-section" hidden>
+                <div class="section-title">
+                  <h3>Michaelis–Menten fit</h3>
+                  <span>Raw measurements + nls curves</span>
+                </div>
+                <div class="plot-frame">
+                  <img id="plot-image" alt="Base R plot of the raw enzyme kinetics data and fitted curves" />
+                </div>
+              </div>
+
+              <div class="interpretation" id="interpretation">
+                <span class="interpretation-mark" aria-hidden="true">↗</span>
+                <div>
+                  <div class="small-label">INTERPRETATION</div>
+                  <p id="interpretation-text"></p>
+                  <p class="interpretation-method">Compared with control (or the first condition); “similar” means within one combined SE.</p>
+                </div>
+              </div>
+
+            </div>
+          </section>
+        </section>
+
+        <footer class="page-footer">
+          <span>Michaelis–Menten model <span class="footer-divider">/</span> separate fit per condition</span>
+          <span>Base R <span class="footer-divider">·</span> no extra packages</span>
+        </footer>
+      </main>
+    </div>
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>
